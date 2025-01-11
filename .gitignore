@@ -1,0 +1,29 @@
+# Compiled Python files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Virtual environments
+env/
+venv/
+
+# PyCharm project files
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# System files
+.DS_store
+Thumbs.db
+
+# Environment files
+.env
+
+# Datasets
+datasets/
