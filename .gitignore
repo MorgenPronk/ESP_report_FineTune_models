@@ -27,3 +27,5 @@ Thumbs.db
 
 # Datasets
 datasets/
+
+configs/credentials.json
