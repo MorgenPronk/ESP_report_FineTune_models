@@ -10,5 +10,13 @@
     "base_model": "meta-llama/Llama-3.2-11B-Vision-Instruct",
     "google_drive_credentials_file": "../configs/credentials.json",
     "enriched_jasonl_path": "./datasets/finetuning_examples/enriched_dataset.jsonl",
-    "log_missing_files_path": "../datasets/finetuning_examples/missing_files.txt"
+    "log_missing_files_path": "../datasets/finetuning_examples/missing_files.txt",
+    "fine_tune": {
+        "dataset_path": "./data/fine_tune_data.jsonl",
+        "model_name": "google/flan-t5-base",
+        "output_dir": "./fine_tuned_flan_model",
+        "num_epochs": 3,
+        "batch_size": 8,
+        "learning_rate": 5e-5
+    }
 }
