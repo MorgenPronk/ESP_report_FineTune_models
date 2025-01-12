@@ -28,4 +28,8 @@ Thumbs.db
 # Datasets
 datasets/
 
+# credentials
 configs/credentials.json
+
+# flags
+flags/

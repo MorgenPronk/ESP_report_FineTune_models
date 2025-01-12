@@ -12,7 +12,7 @@
     "enriched_jasonl_path": "./datasets/finetuning_examples/enriched_dataset.jsonl",
     "log_missing_files_path": "../datasets/finetuning_examples/missing_files.txt",
     "fine_tune": {
-        "dataset_path": "./data/fine_tune_data.jsonl",
+        "dataset_path": "../datasets/finetuning_examples/enriched_dataset.jsonl",
         "model_name": "google/flan-t5-base",
         "output_dir": "./fine_tuned_flan_model",
         "num_epochs": 3,

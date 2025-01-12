@@ -21,6 +21,12 @@ def fine_tune_model(config):
     """
     # Load configuration
     dataset_path = config["fine_tune"]["dataset_path"]
+
+    # dataset retrieval debugging and error handling
+    print(f"Resolved dataset path: {os.path.abspath(dataset_path)}")  # Debugging line
+    if not os.path.exists(dataset_path):
+        raise FileNotFoundError(f"Dataset not found at {dataset_path}")
+
     model_name = config["fine_tune"]["model_name"]
     output_dir = config["fine_tune"]["output_dir"]
     num_epochs = config["fine_tune"].get("num_epochs", 3)
@@ -29,7 +35,7 @@ def fine_tune_model(config):
 
     # Check available hardware
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    pring(f"Using device: {device}")
+    print(f"Using device: {device}")
 
     # Load dataset
     dataset = Dataset.from_json(dataset_path)
