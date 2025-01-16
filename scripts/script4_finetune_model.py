@@ -1,3 +1,5 @@
+## script4_finetune_model.py
+
 import os
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, Seq2SeqTrainer, Seq2SeqTrainingArguments
 from datasets import Dataset

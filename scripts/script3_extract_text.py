@@ -1,3 +1,5 @@
+## script3_extract_text.py
+
 import os
 import json
 from pdf_extraction import get_text_from_pdf
