@@ -1,4 +1,4 @@
-##File name: excel_to_jsonl.py
+##File name: finetune_excel_to_jsonl.py
 
 import pandas as pd
 import json

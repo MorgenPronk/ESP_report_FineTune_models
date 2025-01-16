@@ -1,22 +1,24 @@
 {
-    "input_excel_path": "../datasets/finetuning_examples/AI Training_Install Reports.xlsx",
-    "output_jsonl_path": "../datasets/finetuning_examples/finetuning_data.jsonl",
-    "google_drive_folder_id": "1XvHukPiinuqxDUthxJRQ0zTNY5ESUupq",
-    "download_folder": "../datasets/google_drive_downloads",
-    "enriched_jsonl_path": "../datasets/finetuning_examples/enriched_dataset.jsonl",
-    "log_missing_files": "../datasets/finetuning_examples/missing_files.txt",
-    "hub_model_id": "your_username/fine_tuned_llama_gaslift",
-    "hub_private_dataset_id": "your_username/gaslift_finetune_dataset",
-    "base_model": "meta-llama/Llama-3.2-11B-Vision-Instruct",
-    "google_drive_credentials_file": "../configs/credentials.json",
-    "enriched_jasonl_path": "./datasets/finetuning_examples/enriched_dataset.jsonl",
-    "log_missing_files_path": "../datasets/finetuning_examples/missing_files.txt",
-    "fine_tune": {
-        "dataset_path": "../datasets/finetuning_examples/enriched_dataset.jsonl",
-        "model_name": "google/flan-t5-base",
-        "output_dir": "./fine_tuned_flan_model",
-        "num_epochs": 3,
-        "batch_size": 8,
-        "learning_rate": 5e-5
+    "file_paths": {
+        "input_excel_path": "../datasets/finetuning_examples/AI Training_Install Reports.xlsx",
+        "output_jsonl_path": "../datasets/finetuning_examples/finetuning_data.jsonl",
+        "download_folder": "../datasets/google_drive_downloads",
+        "enriched_jsonl_path": "../datasets/finetuning_examples/enriched_dataset.jsonl",
+        "log_missing_files": "../datasets/finetuning_examples/missing_files.txt",
+        "google_drive_credentials_file": "../configs/credentials.json"
+    },
+    "task_settings": {
+        "google_drive_folder_id": "1XvHukPiinuqxDUthxJRQ0zTNY5ESUupq",
+        "hub_model_id": "your_username/fine_tuned_llama_gaslift",
+        "hub_private_dataset_id": "your_username/gaslift_finetune_dataset",
+        "base_model": "meta-llama/Llama-3.2-11B-Vision-Instruct",
+        "fine_tune": {
+            "dataset_path": "../datasets/finetuning_examples/enriched_dataset.jsonl",
+            "model_name": "google/flan-t5-base",
+            "output_dir": "./fine_tuned_flan_model",
+            "num_epochs": 3,
+            "batch_size": 8,
+            "learning_rate": 5e-5
+        }
     }
 }
