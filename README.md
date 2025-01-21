@@ -33,18 +33,85 @@
   - How to prevent it from answering questions from other people's wells
 
 # Example CLI Commands
-## Run scrape
-python docflow.py scrape --input-path ./data/raw --output-path ./data/processed
+## Finetune pipeline orchestrator
+python docflow.py finetune_orchestrator --config-path ./configs/config.json
 
-## Run fine-tune
-python docflow.py finetune --excel-path ./configs/training_data.xlsx --output-path ./data/training
+## Finetune using prepared jsonl file
+python docflow.py finetune_excel_to_jsonl --input-excel-path ./datasets/finetuning_examples/AI_Training_Install_Reports.xlsx --output-jsonl-path ./datasets/finetuning_examples/finetuning_data.jsonl
 
-## Run download
-python docflow.py download --folder-id <FOLDER_ID> --local-path ./data/downloads
+# CLI Commands for DocFlow
 
+This document outlines all available CLI commands for the DocFlow tool. These commands include core pipeline tasks, state management, and placeholders for future functionality.
+
+---
+
+## **Core Commands**
+
+### 1. Reset Pipeline State
+Resets the state of all pipeline tasks to `pending`.
+
+```
+python docflow.py reset
+```
+Expected behavior:
+- Resets `pipeline_state.json` with all tasks set to `pending`.
+
+### 2. Run full Finetuning Pipeline
+Executes all finetune tasks in sequence using the orchestrator
+```
+python docflow.py finetune_orchestrator --config-path ./configs/config.json
+```
+Expected Behavior:
+- Executes all tasks in sequence, skipping already completed ones
+- prints messages indicating task progress and completion
+
+### 3. Run Individual Tasks
+These commands allow you to run each task independently.
+
+#### Convert Excel to JSONL
+Converts a prepared excel file, that has human scraped data, to the JSONL format required for finetuning.
+```commandline
+python docflow.py finetune_excel_to_jsonl --input-excel-path "./datasets/finetuning_examples/AI Training_Install Reports.xlsx" --output-jsonl-path "./datasets/finetuning_examples/finetuning_data.jsonl"
+```
+Expected Behavior:
+- Task executes and updates the state
+- prints a message indicating successful execution.
+
+#### Download Documents
+Searches files that match name in given google drive and downloads them.
+```
+python docflow.py finetune_download_docs --jsonl-path ./datasets/finetuning_examples/finetuning_data.jsonl --download-folder ./datasets/google_drive_downloads --google-drive-folder-id your-folder-id
+```
+Expected Behavior:
+- Task executes and updates the state
+- prints a message indicating successful execution
+
+#### Fine-tune the Model
+Simulates fine-tuning the model using the enriched JSONL file
+```commandline
+python docflow.py finetune_model --enriched-jsonl-path ./datasets/finetuning_examples/enriched_dataset.jsonl --model-output-path ./models/fine_tuned_model
+```
+### CLI Help Commands
+#### General Help
+```
+python docflow.py --help
+```
+Expected Behavior:
+- Lists all available commands with descriptions.
+
+#### Task-Specific Help
+```
+python docflow.py finetune_excel_to_jsonl --help
+python docflow.py finetune_download_docs --help
+python docflow.py finetune_model --help
+python docflow.py finetune_orchestrator --help
+python docflow.py preview --help
+```
+Expected Behavior:
+- Displays the correct arguments and descriptions for each command.
 
 # Intended file structure
-
+```
 docflow/
 │
 ├── docflow.py              # Main entry point for the CLI
@@ -97,3 +164,4 @@ docflow/
 ├── .gitignore              # Git ignore file
 ├── README.md               # Documentation for the project
 └── requirements.txt        # Python dependencies
+```

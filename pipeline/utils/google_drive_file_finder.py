@@ -1,4 +1,5 @@
 ##File name: google_drive_file_finder.py
+## Utility for the finetune_download_docs task
 
 import os
 import io
@@ -12,6 +13,8 @@ from google.auth.transport.requests import Request
 import googleapiclient.errors
 from scripts.load_config import load_config
 import logging
+
+logger = logging.getLogger(__name__)
 
 def log_to_file(message, log_file="output_log.txt"):
     """
@@ -216,45 +219,44 @@ def download_files_from_list(service, folder_id, file_names, download_folder, ex
         file_names: List of file names to search for.
         download_folder: Local folder to save downloaded files.
         exact_match: Boolean to specify if the search should be exact (True) or partial (False).
+        list_findable: Boolean to list all findable files in the folder for debugging.
 
     Returns:
-        None: Downloads the files and logs missing files.
+        dict: A dictionary of found file names and their corresponding file IDs.
     """
     if not os.path.exists(download_folder):
         os.makedirs(download_folder)
 
     # List all files for debugging purposes
-    if list_findable == True:
+    if list_findable:
         list_all_files(service, folder_id)
 
     # Search for the files recursively
     print("Searching for files recursively...")
     found_files = search_files_recursively(service, folder_id, file_names, exact_match=exact_match)
 
-    # Log found files
-    print("Files Found:")
-    for name in found_files:
-        print(f" - {name}")
+    # # Log found files - Debugging
+    # print("Files Found:")
+    # for name in found_files:
+    #     print(f" - {name}")
 
+    # Download each file
     for file_name, file_id in found_files.items():
-        print(f"Downloading {file_name}...")
-        destination = os.path.join(download_folder, file_name)
-        download_file_from_drive(service, file_id, destination)
-        print(f"Downloaded {file_name} to {destination}")
+        try:
+            logger.info(f"Downloading {file_name}...")
+            destination = os.path.join(download_folder, file_name)
+            download_file_from_drive(service, file_id, destination)
+            logger.info(f"Downloaded {file_name} to {destination}")
+        except Exception as e:
+            logger.info(f"Failed to download {file_name}: {e}")
 
-    # Report missing files
-    missing_files = set(file_names) - set(found_files.keys())
-    if missing_files:
-        missing_files_path = os.path.join(download_folder, 'missing_files.txt')
-        with open(missing_files_path, 'w') as missing_file_log:
-            missing_file_log.write("The following files were not found:\n")
-            for missing_file in missing_files:
-                missing_file_log.write(f"{missing_file}\n")
-        print(f"Missing files logged to {missing_files_path}")
+    # Return the found files dictionary
+    return found_files
+
 
 if __name__ == '__main__':
     # config file location
-    config_file_path = "../configs/config.json"
+    config_file_path = "../../configs/config.json"
 
     # load config
     config = load_config(config_file_path)

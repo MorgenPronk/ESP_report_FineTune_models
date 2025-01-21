@@ -1,10 +1,9 @@
 ##File name: aux_tools.py
 
-import json
 import os
 import re
 import pandas as pd
-import scripts.google_drive_file_finder as google_find
+import pipeline.utils.google_drive_file_finder as google_find
 from scripts.load_config import load_config
 
 def sanitize_filename(filename):

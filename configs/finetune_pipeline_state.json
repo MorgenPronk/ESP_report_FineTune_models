@@ -1,5 +1,5 @@
 {
-    "excel_to_jsonl": "completed",
+    "excel_to_jsonl": "pending",
     "download_docs": "completed",
-    "finetune_model": "completed"
+    "finetune_model": "pending"
 }
