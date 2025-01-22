@@ -5,7 +5,6 @@ import pytesseract
 from openpyxl import load_workbook
 from PIL import Image
 from io import BytesIO
-import logging_utils
 import warnings
 import logging
 import re
@@ -21,8 +20,7 @@ logging.getLogger('pytesseract').setLevel(logging.ERROR)
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # Setup logging
-# logger = logging_utils.setup_logger(f'logs/{__name__}.log')
-logger = logging_utils.setup_logger(f'logs/main_log.log')
+logger = logging.getLogger(__name__)
 
 class ExcelExtractionError(Exception):
     """Custom exception for handling Excel extraction errors."""

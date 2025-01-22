@@ -8,6 +8,7 @@ from pipeline.tasks.finetune_model import finetune_model
 from pipeline.tasks.finetune_orchestrator import orchestrate_finetuning_pipeline
 from pipeline.utils.pipeline_state_tracker import save_state
 from pipeline.utils.load_config import load_config
+from pipeline.tasks.finetune_enrich_jsonl import extract_text_and_enrich
 import logging
 import os
 
@@ -103,6 +104,30 @@ def main():
                                                help=f"Google Drive folder ID (default: {default_google_drive_folder_id})"
                                                )
 
+    # Command: Finetune - Enrich JSONL
+    parser_finetune_enrich_jsonl = subparsers.add_parser(
+        "finetune_enrich_jsonl", help="Enrich JSONL with text extracted from documents"
+    )
+    parser_finetune_enrich_jsonl.add_argument("--jsonl-path",
+                                              type=str,
+                                              default="./datasets/finetuning_examples/finetuning_data.jsonl",
+                                              help="Path to the input JSONL file"
+                                              )
+    parser_finetune_enrich_jsonl.add_argument("--download-folder",
+                                              type=str,
+                                              default="./datasets/google_drive_downloads",
+                                              help="Directory containing downloaded files",
+                                              )
+    parser_finetune_enrich_jsonl.add_argument("--output-jsonl",
+                                              type=str,
+                                              default="./datasets/finetuning_examples/enriched_dataset.jsonl",
+                                              help="Path to save the enriched JSONL file",
+                                              )
+    parser_finetune_enrich_jsonl.add_argument("--log-missing-files",
+                                              type=str,
+                                              default="./logs/missing_files.txt",
+                                              help="Path to save missing files log")
+
     # Command: Finetune - Fine-tune the Model
     parser_finetune_model = subparsers.add_parser(
         "finetune_model", help="Fine-tune the model using enriched JSONL"
@@ -134,6 +159,8 @@ def main():
     elif args.command == "finetune_download_docs":
         google_drive_folder_id = args.google_drive_folder_id
         finetune_download_docs(args.jsonl_path, args.download_folder, google_drive_folder_id)
+    elif args.command == "finetune_enrich_jsonl":
+        extract_text_and_enrich(args.jsonl_path, args.download_folder, args.output_jsonl, args.log_missing_files)
     elif args.command == "finetune_model":
         finetune_model(args.enriched_jsonl_path, args.model_output_path)
     elif args.command == "finetune_orchestrator":

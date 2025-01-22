@@ -1,12 +1,27 @@
-## script3_extract_text.py
-
 import os
 import json
+from pipeline.utils.pipeline_state_tracker import check_step_completed, update_state
 from pipeline.utils.pdf_extraction import get_text_from_pdf
 from pipeline.utils.excel_extraction import get_text_from_excel
-from load_config import load_config
 
-def extract_text_and_enrich(jsonl_path, download_folder, output_jsonl, log_missing_files):
+def log_missing_files(missing_files, log_path):
+    """
+    Logs the missing files to a specified path.
+
+    Args:
+        missing_files (list): List of file names that could not be found.
+        log_path (str): Path to save the log file.
+    """
+    log_dir = os.path.dirname(log_path)
+    os.makedirs(log_dir, exist_ok=True)
+
+    with open(log_path, "w") as file:
+        file.write("The following files could not be found:\n")
+        for missing_file in missing_files:
+            file.write(f"{missing_file}\n")
+    print(f"Missing files logged to: {log_path}")
+
+def extract_text_and_enrich(jsonl_path, download_folder, output_jsonl, log_file_path):
     """
     Extracts text from files listed in the JSONL dataset and enriches the dataset with the extracted text.
 
@@ -14,16 +29,16 @@ def extract_text_and_enrich(jsonl_path, download_folder, output_jsonl, log_missi
         jsonl_path (str): Path to the JSONL file.
         download_folder (str): Directory containing the downloaded files.
         output_jsonl (str): Path to save the enriched JSONL file.
-        log_missing_files (str): Path to save the list of missing files.
+        log_file_path (str): Path to save the list of missing files.
 
     Returns:
         None: Saves the enriched dataset to a JSONL file and logs missing files.
     """
-    # Ensure the directory for log_missing_files exists
-    log_dir = os.path.dirname(log_missing_files)
+    # Ensure the directory for log_file_path exists
+    log_dir = os.path.dirname(log_file_path)
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-        
+
     with open(jsonl_path, "r") as file:
         dataset = [json.loads(line) for line in file]
 
@@ -69,27 +84,8 @@ def extract_text_and_enrich(jsonl_path, download_folder, output_jsonl, log_missi
 
     # Save missing files log
     if missing_files:
-        with open(log_missing_files, "w") as log_file:
+        with open(log_file_path, "w") as log_file:
             log_file.write("The following files were not found:\n")
             for missing_file in missing_files:
                 log_file.write(f"{missing_file}\n")
-        print(f"Missing files logged to {log_missing_files}")
-
-def main(config):
-    """
-    Main function to run the script. Uses default paths for now.
-    """
-    JSONL_PATH = config['output_jsonl_path']
-    DOWNLOAD_FOLDER = config['download_folder']
-    OUTPUT_JSONL_PATH = config['enriched_jsonl_path']
-    LOG_MISSING_FILES = config['log_missing_files_path']
-    extract_text_and_enrich(
-        jsonl_path=JSONL_PATH,
-        download_folder=DOWNLOAD_FOLDER,
-        output_jsonl=OUTPUT_JSONL_PATH,
-        log_missing_files=LOG_MISSING_FILES,
-    )
-
-if __name__ == "__main__":
-    config = load_config('../configs/config.json')
-    main(config)
+        print(f"Missing files logged to {log_file_path}")

@@ -4,24 +4,31 @@ from pdfminer.high_level import extract_text
 from pdf2image import convert_from_path
 import pytesseract
 
-import logging_utils
-from ocr_utils import perform_ocr_on_image
+from pipeline.utils.ocr_utils import perform_ocr_on_image
 import logging
 
 # Suppress lower-level logging messages from pytesseract
+# `logging` object has to inherit configuration from docflow.py or somewhere else to work
 logging.getLogger('pytesseract').setLevel(logging.ERROR)
 
 # If Tesseract is not in your system PATH, you can explicitly provide the path
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 # logger = logging_utils.setup_logger(f'logs/{__name__}.log')
-logger = logging_utils.setup_logger(f'logs/main_log.log')
+logger = logging.getLogger(__name__)
 
 class PDFExtractionError(Exception):
     """Custom exception for handling PDF extraction errors."""
     pass
 
 def extract_text_from_pdf(file_path):
+    """
+    Extract text from a PDF file using PDFMiner.
+
+    :param file_path: file path of PDF to have text extracted
+    :return text: returned raw text from document
+    """
+
     try:
         text = extract_text(file_path)
         return text
@@ -30,6 +37,12 @@ def extract_text_from_pdf(file_path):
         raise PDFExtractionError(f"Error extracting text from PDF {file_path}")
 
 def extract_text_from_pdf_with_ocr(file_path):
+    """
+    Extract text from a PDF file using OCR (Tesseract) for image-based PDFs.
+
+    :param file_path:
+    :return text: raw text from images using OCR
+    """
     try:
         # Explicitly provide the path to the Poppler binaries
         poppler_path = r"C:/Program Files/poppler-24.07.0/Library/bin"  # Update to your actual Poppler path
@@ -44,6 +57,12 @@ def extract_text_from_pdf_with_ocr(file_path):
         raise PDFExtractionError(f"Error performing OCR on PDF {file_path}")
 
 def get_text_from_pdf(file_path):
+    """
+    Extract text from a PDF, combining both direct text extraction and OCR if necessary.
+
+    :param file_path:
+    :return combined_text:
+    """
     try:
         text = extract_text_from_pdf(file_path)
         if not text.strip():
