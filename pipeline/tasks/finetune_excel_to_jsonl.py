@@ -181,12 +181,12 @@ def finetune_excel_to_jsonl(input_excel_path, output_jsonl_path):
         input_excel_path (str): Path to the input Excel file.
         output_jsonl_path (str): Path to save the resulting JSONL file.
     """
-    if check_step_completed("excel_to_jsonl"):
+    if check_step_completed("finetune_excel_to_jsonl"):
         print("Excel to JSONL step already completed. Skipping...")
         return
 
     print(f"Converting Excel file {input_excel_path} to JSONL at {output_jsonl_path}...")
     excel_to_jsonl(input_excel_path, output_jsonl_path)
-    update_state("excel_to_jsonl", "completed")
+    update_state("finetune_excel_to_jsonl", "completed")
     print("Excel to JSONL step completed.")
 

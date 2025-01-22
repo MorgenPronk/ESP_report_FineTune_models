@@ -1,5 +1,7 @@
 {
-    "excel_to_jsonl": "pending",
-    "download_docs": "pending",
+    "finetune_excel_to_jsonl": "completed",
+    "finetune_download_docs": "completed",
+    "finetune_enrich_jsonl": "completed",
+    "finetune_jsonl_empty_remove": "completed",
     "finetune_model": "pending"
 }

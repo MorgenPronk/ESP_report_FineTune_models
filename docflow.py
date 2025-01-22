@@ -4,11 +4,11 @@
 import argparse
 from pipeline.tasks.finetune_excel_to_jsonl import finetune_excel_to_jsonl
 from pipeline.tasks.finetune_download_docs import finetune_download_docs
-from pipeline.tasks.finetune_model import finetune_model
 from pipeline.tasks.finetune_orchestrator import orchestrate_finetuning_pipeline
 from pipeline.utils.pipeline_state_tracker import save_state
 from pipeline.utils.load_config import load_config
 from pipeline.tasks.finetune_enrich_jsonl import extract_text_and_enrich
+from pipeline.tasks.finetune_model import (finetune_base_model, finetune_instruct_model)
 import logging
 import os
 
@@ -35,10 +35,12 @@ def reset_pipeline_state():
     This allows tasks to be re-executed as if starting from scratch.
     """
     default_state = {
-        "excel_to_jsonl": "pending",
-        "download_docs": "pending",
-        "finetune_model": "pending",
-    }
+    "finetune_excel_to_jsonl": "pending",
+    "finetune_download_docs": "pending",
+    "finetune_enrich_jsonl": "pending",
+    "finetune_jsonl_empty_remove": "pending",
+    "finetune_model": "pending"
+}
     save_state(default_state)
     print("Pipeline state has been reset.")
 
@@ -76,11 +78,11 @@ def main():
     parser_finetune_excel_to_jsonl = subparsers.add_parser(
         "finetune_excel_to_jsonl", help="Convert Excel to JSONL for finetuning"
     )
-    parser_finetune_excel_to_jsonl.add_argument("--input-excel-path",
+    parser_finetune_excel_to_jsonl.add_argument("--input_excel_path",
                                                 type=str, default="./datasets/finetuning_examples/AI Training_Install Reports.xlsx",
                                                 help="Path to the input Excel file (default: './datasets/finetuning_examples/AI Training_Install Reports.xlsx')"
                                                 )
-    parser_finetune_excel_to_jsonl.add_argument("--output-jsonl-path",
+    parser_finetune_excel_to_jsonl.add_argument("--output_jsonl_path",
                                                 default="./datasets/finetuning_examples/finetuning_data.jsonl",
                                                 help="Path to save the JSONL file (default: './datasets/finetuning_examples/finetuning_data.jsonl')"
                                                 )
@@ -88,17 +90,17 @@ def main():
     parser_finetune_download_docs = subparsers.add_parser(
         "finetune_download_docs", help="Download documents for finetuning"
     )
-    parser_finetune_download_docs.add_argument("--jsonl-path",
+    parser_finetune_download_docs.add_argument("--jsonl_path",
                                                type=str,
                                                default="./datasets/finetuning_examples/finetuning_data.jsonl",
                                                help="Path to the JSONL file"
                                                )
-    parser_finetune_download_docs.add_argument("--download-folder",
+    parser_finetune_download_docs.add_argument("--download_folder",
                                                type=str,
                                                default="./datasets/google_drive_downloads",
                                                help="Path to save downloaded documents"
                                                )
-    parser_finetune_download_docs.add_argument("--google-drive-folder-id",
+    parser_finetune_download_docs.add_argument("--google_drive_folder_id",
                                                type=str,
                                                default=default_google_drive_folder_id,
                                                help=f"Google Drive folder ID (default: {default_google_drive_folder_id})"
@@ -108,45 +110,57 @@ def main():
     parser_finetune_enrich_jsonl = subparsers.add_parser(
         "finetune_enrich_jsonl", help="Enrich JSONL with text extracted from documents"
     )
-    parser_finetune_enrich_jsonl.add_argument("--jsonl-path",
+    parser_finetune_enrich_jsonl.add_argument("--jsonl_path",
                                               type=str,
                                               default="./datasets/finetuning_examples/finetuning_data.jsonl",
                                               help="Path to the input JSONL file"
                                               )
-    parser_finetune_enrich_jsonl.add_argument("--download-folder",
+    parser_finetune_enrich_jsonl.add_argument("--download_folder",
                                               type=str,
                                               default="./datasets/google_drive_downloads",
                                               help="Directory containing downloaded files",
                                               )
-    parser_finetune_enrich_jsonl.add_argument("--output-jsonl",
+    parser_finetune_enrich_jsonl.add_argument("--output_jsonl",
                                               type=str,
                                               default="./datasets/finetuning_examples/enriched_dataset.jsonl",
                                               help="Path to save the enriched JSONL file",
                                               )
-    parser_finetune_enrich_jsonl.add_argument("--log-missing-files",
+    parser_finetune_enrich_jsonl.add_argument("--log_missing_files",
                                               type=str,
                                               default="./logs/missing_files.txt",
                                               help="Path to save missing files log")
 
-    # Command: Finetune - Fine-tune the Model
-    parser_finetune_model = subparsers.add_parser(
-        "finetune_model", help="Fine-tune the model using enriched JSONL"
-    )
-    parser_finetune_model.add_argument("--enriched-jsonl-path", type=str, required=True, help="Path to the enriched JSONL file")
-    parser_finetune_model.add_argument("--model-output-path", type=str, required=True, help="Path to save the fine-tuned model")
+    # Subparser for fine-tuning base model
+    base_parser = subparsers.add_parser("finetune_base_model", help="Fine-tune a base model")
+    base_parser.add_argument("--model_name", type=str, required=True, help="Pre-trained model name or path")
+    base_parser.add_argument("--dataset_path", type=str, required=True, help="Path to the dataset (JSONL)")
+    base_parser.add_argument("--output_dir", type=str, required=True, help="Directory to save the fine-tuned model")
+    base_parser.add_argument("--num_epochs", type=int, default=3, help="Number of training epochs")
+    base_parser.add_argument("--batch_size", type=int, default=8, help="Batch size")
+    base_parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate")
+    base_parser.add_argument("--eval_split", type=float, default=0.1, help="Proportion of dataset for evaluation")
+
+    # Subparser for fine-tuning instruction model
+    instruct_parser = subparsers.add_parser("finetune_instruction_model", help="Fine-tune an instruction-tuned model")
+    instruct_parser.add_argument("--model_name", type=str, required=True, help="Pre-trained model name or path")
+    instruct_parser.add_argument("--dataset_path", type=str, required=True, help="Path to the dataset (JSONL)")
+    instruct_parser.add_argument("--output_dir", type=str, required=True, help="Directory to save the fine-tuned model")
+    instruct_parser.add_argument("--num_epochs", type=int, default=3, help="Number of training epochs")
+    instruct_parser.add_argument("--batch_size", type=int, default=8, help="Batch size")
+    instruct_parser.add_argument("--learning_rate", type=float, default=5e-5, help="Learning rate")
+    instruct_parser.add_argument("--eval_split", type=float, default=0.1, help="Proportion of dataset for evaluation")
 
     # Command: Orchestrate the Full Finetuning Pipeline
     parser_finetune_orchestrator = subparsers.add_parser(
         "finetune_orchestrator", help="Run the full finetuning pipeline"
     )
-    parser_finetune_orchestrator.add_argument("--config-path", type=str, required=True, help="Path to the pipeline configuration file")
 
     # Placeholder Command: Scrape Documents
     parser_scrape = subparsers.add_parser("scrape", help="Scrape documents (placeholder)")
 
     # Placeholder Command: Preview Documents
     parser_preview = subparsers.add_parser("preview", help="Preview documents (placeholder)")
-    parser_preview.add_argument("--file-path", type=str, required=True, help="Path to the document to preview")
+    parser_preview.add_argument("--file_path", type=str, required=True, help="Path to the document to preview")
 
     # Parse CLI arguments
     args = parser.parse_args()
@@ -161,8 +175,26 @@ def main():
         finetune_download_docs(args.jsonl_path, args.download_folder, google_drive_folder_id)
     elif args.command == "finetune_enrich_jsonl":
         extract_text_and_enrich(args.jsonl_path, args.download_folder, args.output_jsonl, args.log_missing_files)
-    elif args.command == "finetune_model":
-        finetune_model(args.enriched_jsonl_path, args.model_output_path)
+    elif args.command == "finetune_base_model":
+        finetune_base_model(
+            model_name=args.model_name,
+            dataset_path=args.dataset_path,
+            output_dir=args.output_dir,
+            num_epochs=args.num_epochs,
+            batch_size=args.batch_size,
+            learning_rate=args.learning_rate,
+            eval_split=args.eval_split,
+        )
+    elif args.command == "finetune_instruction_model":
+        finetune_instruct_model(
+            model_name=args.model_name,
+            dataset_path=args.dataset_path,
+            output_dir=args.output_dir,
+            num_epochs=args.num_epochs,
+            batch_size=args.batch_size,
+            learning_rate=args.learning_rate,
+            eval_split=args.eval_split,
+        )
     elif args.command == "finetune_orchestrator":
         orchestrate_finetuning_pipeline(config)
     elif args.command == "scrape":

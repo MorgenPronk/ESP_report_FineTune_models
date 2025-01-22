@@ -12,10 +12,11 @@ def load_state():
             return json.load(f)
     else:
         return {
-            "scrape": "pending",
-            "download": "pending",
-            "finetune": "pending",
-        }
+        "finetune_excel_to_jsonl": "pending",
+        "finetune_download_docs": "pending",
+        "finetune_enrich_jsonl": "pending",
+        "finetune_model": "pending"
+    }
 
 def save_state(state):
     """

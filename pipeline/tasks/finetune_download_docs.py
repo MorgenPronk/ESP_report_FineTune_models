@@ -66,7 +66,7 @@ def finetune_download_docs(jsonl_path, download_folder, google_drive_folder_id):
         )
 
     # Check if the step has already been completed
-    if check_step_completed("download_docs"):
+    if check_step_completed("finetune_download_docs"):
         print("Download step already completed. Skipping...")
         return
 
@@ -95,5 +95,5 @@ def finetune_download_docs(jsonl_path, download_folder, google_drive_folder_id):
         log_missing_files(list(missing_files))
 
     # Update the state tracker
-    update_state("download_docs", "completed")
+    update_state("finetune_download_docs", "completed")
     print("Download documents step completed.")

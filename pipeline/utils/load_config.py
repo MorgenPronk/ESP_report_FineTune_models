@@ -31,6 +31,9 @@ def validate_config(config, required_keys):
     Raises:
         KeyError: If any required key is missing.
     """
+    # # Debugging
+    # print(f'config: {list(config.keys())}')
+    # print(f'required: {required_keys}')
     for key in required_keys:
-        if key not in config:
+        if key not in list(config.keys()):
             raise KeyError(f"Missing required key in config: {key}")

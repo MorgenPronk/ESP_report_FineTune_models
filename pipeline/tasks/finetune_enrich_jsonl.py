@@ -34,6 +34,10 @@ def extract_text_and_enrich(jsonl_path, download_folder, output_jsonl, log_file_
     Returns:
         None: Saves the enriched dataset to a JSONL file and logs missing files.
     """
+    if check_step_completed("finetune_enrich_jsonl"):
+        print("Enrich_jsonl step already completed. Skipping...")
+        return
+
     # Ensure the directory for log_file_path exists
     log_dir = os.path.dirname(log_file_path)
     if not os.path.exists(log_dir):
@@ -89,3 +93,6 @@ def extract_text_and_enrich(jsonl_path, download_folder, output_jsonl, log_file_
             for missing_file in missing_files:
                 log_file.write(f"{missing_file}\n")
         print(f"Missing files logged to {log_file_path}")
+
+    # Update state
+    update_state("finetune_enrich_jsonl", "completed")
