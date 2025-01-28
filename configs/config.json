@@ -22,5 +22,8 @@
             "learning_rate": 5e-5,
             "eval_split": 0.1
         }
+    },
+    "google_genai": {
+        "api_key": "AIzaSyBSodxQs10pt8S56Puw_diJzAaCgERXjUU"
     }
 }
